@@ -6,14 +6,23 @@ from .serializer import PersonSerializer
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import LimitOffsetPagination
+
 
 @api_view(['GET'])
-@authentication_classes([BasicAuthentication])
-@permission_classes([IsAuthenticated])
 def index(request):
     all_persons = Person.objects.all()
-    serializer = PersonSerializer(all_persons, many=True)
-    return Response(serializer.data)
+    pagination_class = LimitOffsetPagination()
+    paginated_data = pagination_class.paginate_queryset(all_persons, request)
+    serializer = PersonSerializer(paginated_data, many=True)
+    response_data = {
+        'count': all_persons.count(),
+        'next': pagination_class.get_next_link(),
+        'previous': pagination_class.get_previous_link(),
+        'results': serializer.data
+    } 
+    
+    return Response(response_data, status=200)
 
 @api_view(['GET'])
 def get_person(request):
