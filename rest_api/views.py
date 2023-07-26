@@ -1,15 +1,16 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from .models import Person
 from .serializer import PersonSerializer
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from .serializer import FilteredPersonSerializer
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 
-
 @api_view(['GET'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([IsAuthenticated])
 def index(request):
     all_persons = Person.objects.all()
     pagination_class = LimitOffsetPagination()
@@ -25,6 +26,28 @@ def index(request):
     return Response(response_data, status=200)
 
 @api_view(['GET'])
+def filtered_persons(request):
+    queryset = Person.objects.all()
+    first_name = request.query_params.get('first_name', None)
+    last_name = request.query_params.get('last_name', None)
+    age = request.query_params.get('age', None)
+
+    if first_name:
+        queryset = queryset.filter(first_name__icontains=first_name)
+    if last_name:
+        queryset = queryset.filter(last_name__icontains=last_name)
+    if age:
+        queryset = queryset.filter(age=age)
+
+    serializer = FilteredPersonSerializer(queryset, many=True)
+
+    return Response(serializer.data)
+
+
+
+
+
+@api_view(['GET'])
 def get_person(request):
     person_id = request.data.get('person_id')
     try:
@@ -33,6 +56,7 @@ def get_person(request):
         return Response(serializer.data)
     except Person.DoesNotExist:
         return Response({"ERROR":"The person dose not exist"}, status=404)
+
 
 @api_view(['GET', 'POST'])
 @authentication_classes([BasicAuthentication])
@@ -46,6 +70,7 @@ def create_person(request):
     else:
         return Response(serializer.errors, status=400)
     
+
 @api_view(['Delete'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
@@ -58,15 +83,14 @@ def delete_person(request):
     except Person.DoesNotExist:
         return Response({"ERROR":"The person dose not exist"}, status=404)
     
+
 @api_view(['PUT'])
 @authentication_classes([BasicAuthentication])
 @permission_classes([IsAuthenticated])
 def update_person(request):
     person_id = request.data.get('person_id')
-
     try:
         person = Person.objects.get(id=person_id)
-
         fields_to_update = [
             'first_name', 'last_name', 'email', 'phone',
             'dateOfBirth', 'age', 'username', 'password'
