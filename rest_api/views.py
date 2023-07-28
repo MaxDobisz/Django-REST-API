@@ -7,7 +7,6 @@ from .serializer import FilteredPersonSerializer
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework import status
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH','DELETE'])
 @authentication_classes([BasicAuthentication])
@@ -85,22 +84,20 @@ def persons(request, person_id=None):
         except Person.DoesNotExist:
             return Response({"ERROR":"The person dose not exist"}, status=404)
 
+@api_view(['GET'])
+def persons_filter(request):
+    queryset = Person.objects.all()
+    first_name = request.query_params.get('first_name', None)
+    last_name = request.query_params.get('last_name', None)
+    age = request.query_params.get('age', None)
 
+    if first_name:
+        queryset = queryset.filter(first_name__icontains=first_name)
+    if last_name:
+        queryset = queryset.filter(last_name__icontains=last_name)
+    if age:
+        queryset = queryset.filter(age=age)
 
-# @api_view(['GET'])
-# def filtered_persons(request):
-#     queryset = Person.objects.all()
-#     first_name = request.query_params.get('first_name', None)
-#     last_name = request.query_params.get('last_name', None)
-#     age = request.query_params.get('age', None)
+    serializer = FilteredPersonSerializer(queryset, many=True)
 
-#     if first_name:
-#         queryset = queryset.filter(first_name__icontains=first_name)
-#     if last_name:
-#         queryset = queryset.filter(last_name__icontains=last_name)
-#     if age:
-#         queryset = queryset.filter(age=age)
-
-#     serializer = FilteredPersonSerializer(queryset, many=True)
-
-#     return Response(serializer.data)
+    return Response(serializer.data)
