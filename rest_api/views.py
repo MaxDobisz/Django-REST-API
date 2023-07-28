@@ -14,18 +14,26 @@ from rest_framework import status
 @permission_classes([IsAuthenticated])
 def persons(request, person_id=None):
     if request.method == 'GET':
-        all_persons = Person.objects.all()
-        pagination_class = LimitOffsetPagination()
-        paginated_data = pagination_class.paginate_queryset(all_persons, request)
-        serializer = PersonSerializer(paginated_data, many=True)
-        response_data = {
-            'count': all_persons.count(),
-            'next': pagination_class.get_next_link(),
-            'previous': pagination_class.get_previous_link(),
-            'results': serializer.data
-        } 
-        
-        return Response(response_data, status=200)
+        if person_id:
+            try:
+                person = Person.objects.get(id=person_id)
+                serializer = PersonSerializer(person)
+                return Response(serializer.data)
+            except Person.DoesNotExist:
+                return Response({"ERROR":"The person dose not exist"}, status=404)
+        else:
+            all_persons = Person.objects.all()
+            pagination_class = LimitOffsetPagination()
+            paginated_data = pagination_class.paginate_queryset(all_persons, request)
+            serializer = PersonSerializer(paginated_data, many=True)
+            response_data = {
+                'count': all_persons.count(),
+                'next': pagination_class.get_next_link(),
+                'previous': pagination_class.get_previous_link(),
+                'results': serializer.data
+            } 
+            
+            return Response(response_data, status=200)
 
     elif request.method == 'POST':
         data = request.data
@@ -76,27 +84,6 @@ def persons(request, person_id=None):
             return Response({"SUCCESS":"The person has been deleted"}, status=200)
         except Person.DoesNotExist:
             return Response({"ERROR":"The person dose not exist"}, status=404)
-
-
-
-
-
-
-# @api_view(['GET'])
-# def get_person(request):
-#     person_id = request.GET.get('id')
-#     try:
-#         person = Person.objects.get(id=person_id)
-#         serializer = PersonSerializer(person)
-#         return Response(serializer.data)
-#     except Person.DoesNotExist:
-#         return Response({"ERROR":"The person dose not exist"}, status=404)
-
-
-
-
-
-
 
 
 
