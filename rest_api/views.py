@@ -8,22 +8,9 @@ from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 
-@api_view(['GET'])
-@authentication_classes([BasicAuthentication])
-@permission_classes([IsAuthenticated])
-def index(request):
-    all_persons = Person.objects.all()
-    pagination_class = LimitOffsetPagination()
-    paginated_data = pagination_class.paginate_queryset(all_persons, request)
-    serializer = PersonSerializer(paginated_data, many=True)
-    response_data = {
-        'count': all_persons.count(),
-        'next': pagination_class.get_next_link(),
-        'previous': pagination_class.get_previous_link(),
-        'results': serializer.data
-    } 
-    
-    return Response(response_data, status=200)
+
+
+
 
 @api_view(['GET'])
 def filtered_persons(request):
@@ -45,11 +32,9 @@ def filtered_persons(request):
 
 
 
-
-
 @api_view(['GET'])
 def get_person(request):
-    person_id = request.data.get('person_id')
+    person_id = request.GET.get('id')
     try:
         person = Person.objects.get(id=person_id)
         serializer = PersonSerializer(person)
@@ -57,6 +42,23 @@ def get_person(request):
     except Person.DoesNotExist:
         return Response({"ERROR":"The person dose not exist"}, status=404)
 
+
+@api_view(['GET'])
+@authentication_classes([BasicAuthentication])
+@permission_classes([IsAuthenticated])
+def index(request):
+    all_persons = Person.objects.all()
+    pagination_class = LimitOffsetPagination()
+    paginated_data = pagination_class.paginate_queryset(all_persons, request)
+    serializer = PersonSerializer(paginated_data, many=True)
+    response_data = {
+        'count': all_persons.count(),
+        'next': pagination_class.get_next_link(),
+        'previous': pagination_class.get_previous_link(),
+        'results': serializer.data
+    } 
+    
+    return Response(response_data, status=200)
 
 @api_view(['GET', 'POST'])
 @authentication_classes([BasicAuthentication])
