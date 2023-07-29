@@ -1,9 +1,7 @@
-from django.shortcuts import render
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from .models import Person
-from .serializer import PersonSerializer
-from .serializer import FilteredPersonSerializer
+from .serializer import PersonSerializer, FilteredPersonSerializer
 from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
@@ -17,7 +15,7 @@ def persons(request, person_id=None):
             try:
                 person = Person.objects.get(id=person_id)
                 serializer = PersonSerializer(person)
-                return Response(serializer.data)
+                return Response(serializer.data, status=200)
             except Person.DoesNotExist:
                 return Response({"ERROR":"The person dose not exist"}, status=404)
         else:
@@ -57,7 +55,7 @@ def persons(request, person_id=None):
                     setattr(person, field, new_value)
 
             person.save()
-            return Response({"SUCCESS": "The person has been updated"})
+            return Response({"SUCCESS": "The person has been updated"}, status=200)
         
         except Person.DoesNotExist:
             return Response({"ERROR": "The person does not exist"}, status=404) 
@@ -71,7 +69,7 @@ def persons(request, person_id=None):
                     setattr(person, field, request.data[field])
 
             person.save()
-            return Response({"SUCCESS": "The person has been updated"})
+            return Response({"SUCCESS": "The person has been updated"}, status=200)
         
         except Person.DoesNotExist:
             return Response({"ERROR": "The person does not exist"}, status=404) 
@@ -100,4 +98,4 @@ def persons_filter(request):
 
     serializer = FilteredPersonSerializer(queryset, many=True)
 
-    return Response(serializer.data)
+    return Response(serializer.data, status=200)
