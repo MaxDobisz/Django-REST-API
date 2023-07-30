@@ -10,7 +10,7 @@ class BasicTestsSetUp(APITestCase):
             last_name="admin",
             email="admin@email.com",
             phone="07555555555",
-            dateOfBirth="2000-01-01",
+            date_of_birth="2000-01-01",
             age=23,
             username="admin",
             password="admin"
@@ -21,7 +21,7 @@ class BasicTestsSetUp(APITestCase):
             last_name="Focus",
             email="ford@email.com",
             phone="07512345678",
-            dateOfBirth="2000-01-01",
+            date_of_birth="2000-01-01",
             age=23,
             username="quest1",
             password="12345"
@@ -40,7 +40,7 @@ class PersonsViewTests(BasicTestsSetUp):
             "last_name": "Carraway",
             "email": "nick@email.com",
             "phone": "07598765430",
-            "dateOfBirth": "1925-01-01",
+            "date_of_birth": "1925-01-01",
             "age": 98,
             "username": "nick",
             "password": "12345"
@@ -68,7 +68,7 @@ class PersonsViewTests(BasicTestsSetUp):
             "last_name": "White",
             "email": "barry@email.com",
             "phone": "07598765430",
-            "dateOfBirth": "1999-01-01",
+            "date_of_birth": "1999-01-01",
             "age": 24,
             "username": "Barry",
             "password": "12345"

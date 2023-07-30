@@ -50,7 +50,7 @@ def persons(request, person_id=None):
                         if person_id:
                             try:
                                 person = Person.objects.get(id=person_id)
-                                fields_to_update = ['first_name','last_name','email', 'phone','dateOfBirth','age','username','password']
+                                fields_to_update = ['first_name','last_name','email', 'phone','date_of_birth','age','username','password']
                                 for field in fields_to_update:
                                     new_value = request.data.get(field)
                                     if new_value is not None:
